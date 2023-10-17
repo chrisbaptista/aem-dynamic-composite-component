@@ -77,6 +77,14 @@
                             <type>zip</type>
                             <target>/apps/editable-components-packages/application/install</target>
                         </embedded>
+                        <embedded>
+                            <groupId>com.adobe.acs</groupId>
+                            <artifactId>acs-aem-commons-all</artifactId>
+                            <type>zip</type>
+                            <target>/apps/editable-components-packages/content/install</target>
+                            <filter>true</filter>
+                            <isAllVersionsFilter>true</isAllVersionsFilter>
+                        </embedded>
                     </embeddeds>
                 </configuration>
             </plugin>
@@ -197,5 +205,11 @@
             <type>zip</type>
         </dependency>
 
+        <dependency>
+            <groupId>com.adobe.acs</groupId>
+            <artifactId>acs-aem-commons-all</artifactId>
+            <version>6.0.10</version>
+            <type>zip</type>
+        </dependency>
     </dependencies>
 </project>

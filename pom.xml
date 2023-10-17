@@ -1138,7 +1138,7 @@ Bundle-DocURL:
         </exclusions>
                     
       </dependency>
-                  
+
       <dependency>
                         
         <groupId>uk.org.lidalia</groupId>
