@@ -1,6 +1,6 @@
-# Sample AEM project template
+# AEM Editable Components
 
-This is a project template for AEM-based applications. It is intended as a best-practice set of examples as well as a potential starting point to develop your own functionality.
+This is based on the work found here https://github.com/Dnjoroge/editable-components
 
 ## Modules
 
