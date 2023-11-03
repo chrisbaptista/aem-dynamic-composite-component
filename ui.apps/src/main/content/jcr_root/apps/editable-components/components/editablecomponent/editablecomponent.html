@@ -1,4 +1,23 @@
-<div data-sly-test="${wcmmode.edit || wcmmode.design}" class="author-ui-bar">Editable Component</div>
+<sly
+    data-sly-use.templates="core/wcm/components/commons/v1/templates.html"
+    data-sly-call="${templates.placeholder @ isEmpty = !properties.fragmentVariationPath}">Editable Component</sly>
+
 <div class="cmp-editablecomponent">
-    <sly data-sly-resource="${resource @ resourceType='editable-components/components/container'}"></sly>
+    <!--/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    This Block was taken from /libs/wcm/foundation/components/responsivegrid/responsivegrid.html
+    We are using most of it, but removing the ability to add more components.
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/-->
+    <sly data-sly-test="${wcmmode.edit}" data-sly-use.allowed="com.day.cq.wcm.foundation.model.AllowedComponents"></sly>
+
+    <div data-sly-use.api="com.day.cq.wcm.foundation.model.responsivegrid.ResponsiveGrid" class="${api.cssClass} ${allowed.cssClass}">
+        <sly data-sly-test.isAllowedApplicable="${allowed.isApplicable}"
+             data-sly-test="${isAllowedApplicable}"
+             data-sly-use.allowedTemplate="/libs/wcm/foundation/components/parsys/allowedcomponents/allowedcomponents-tpl.html"
+             data-sly-call="${allowedTemplate.allowedcomponents @ title=allowed.title, resourcesMap=allowed.resourcesMap,
+            placeholderCss=allowed.placeholderCssClass,
+            placeholderType=allowed.placeholderResourceType}"></sly>
+        <sly data-sly-test="${!isAllowedApplicable}"
+             data-sly-repeat.child="${api.paragraphs}"
+             data-sly-resource="${child.resource @ decoration='true', cssClassName=child.cssClass}"></sly>
+    </div>
 </div>

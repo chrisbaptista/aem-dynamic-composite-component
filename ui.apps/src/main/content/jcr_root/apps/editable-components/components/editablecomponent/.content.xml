@@ -4,5 +4,4 @@
           jcr:primaryType="cq:Component"
           cq:isContainer="true"
           jcr:title="Editable Component"
-          sling:resourceSuperType="editable-components/components/container"
           componentGroup="Editable Component Site - Content"/>

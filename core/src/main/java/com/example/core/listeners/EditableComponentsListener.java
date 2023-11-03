@@ -1,12 +1,8 @@
 package com.example.core.listeners;
 
-import com.example.core.jcr.JcrUtil;
+import com.example.core.services.JcrUtilService;
 import org.apache.commons.lang.StringUtils;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.jcr.api.SlingRepository;
-import org.osgi.service.component.ComponentContext;
+import org.apache.sling.api.resource.*;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -38,18 +34,20 @@ public class EditableComponentsListener implements EventListener {
 
     public static final String EDITABLE_COMPONENT_RESOURCE_SUPER_TYPE = "editable-components/components/editablecomponent";
 
-    @Reference
-    private ResourceResolverFactory resolverFactory;
-
-    @Reference
-    private SlingRepository slingRepository;
+    private final JcrUtilService jcrUtilService;
 
     private Session session;
 
+    /**
+     * Constructor
+     * @param jcrUtilService JCR Util Service
+     */
     @Activate
-    protected void activate(ComponentContext componentContext) {
+    public EditableComponentsListener(@Reference JcrUtilService jcrUtilService) {
+        this.jcrUtilService = jcrUtilService;
+
         try {
-            session = JcrUtil.getSession(slingRepository);
+            session = jcrUtilService.getSession();
             final String[] types = {
                     NT_UNSTRUCTURED
             };
@@ -79,26 +77,39 @@ public class EditableComponentsListener implements EventListener {
                 Event event = events.nextEvent();
                 final String eventPath = event.getPath();
 
+                ResourceResolver resourceResolver = jcrUtilService.getResourceResolver();
                 // Current event absolute path
                 final String eventJcrContentPath = StringUtils.substringBeforeLast(eventPath, "/");
-                final Resource componentResource = JcrUtil.getResourceResolver(resolverFactory).getResource(eventJcrContentPath);
+                final Resource componentResource = resourceResolver.getResource(eventJcrContentPath);
                 if (componentResource != null) {
                     final String resourceType = componentResource.getResourceType();
-                    // verify is Editable Component modification
+                    final ValueMap properties = componentResource.adaptTo(ModifiableValueMap.class);
+
                     if (StringUtils.contains(resourceType, EDITABLE_COMPONENT_RESOURCE_SUPER_TYPE)) {
 
-                        ValueMap properties = componentResource.getValueMap();
-                        // add jcr:content/root
+                        // add jcr:content/root to path
                         final String componentsStructureOrigin = properties.get("fragmentVariationPath", "") + "/" + JCR_CONTENT + "/root";
                         final boolean isRefreshComponents = properties.get("refreshComponents", false);
 
                         // Localize the components structure view
-                        JcrUtil.copyNodes(componentsStructureOrigin,
+                        jcrUtilService.copyNodes(componentsStructureOrigin,
                                 eventJcrContentPath,
-                                resolverFactory,
+                                resourceResolver,
                                 isRefreshComponents);
+
                     }
+
+                    /*
+                     * Reset Refresh Components flag to false.
+                     * Leaving true will allow component to refresh content by accident
+                     */
+                    properties.put("refreshComponents", false);
+
+                    // Commit JCR updates
+                    resourceResolver.commit();
                 }
+                // Close Resource Resolver
+                resourceResolver.close();
             }
         } catch (Exception e) {
             log.error("Exception occurred", e);
